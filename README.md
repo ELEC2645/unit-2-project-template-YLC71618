@@ -15,7 +15,7 @@ For File I/O, this program automatically saves `modules.dat`, `tasks.dat`, and `
 
 
 ### 3. Run 
-You can run the application with `./main.out`
+You can run the application with `make test` then `./main.out`
 
 
 
