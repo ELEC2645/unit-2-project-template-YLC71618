@@ -1,37 +1,21 @@
-[![Open in Codespaces](https://classroom.github.com/assets/launch-codespace-2972f46106e565e64193e422d61a12cf1da4916b45550586e14ef0a7c637dd04.svg)](https://classroom.github.com/open-in-codespaces?assignment_repo_id=21756752)
-# ELEC2645 Unit 2 Project Template
+# ELEC2645 Unit 2 - University Study Planner
 
-** PLEASE DELETE THIS README AND REPLACE IT WITH YOUR OWN README.md FILE DESCRIBING YOUR PROJECT **
+### 1. Introduction
 
+This is a command-line application project implemented in C that helps `University students` manage their free time. It allows user to enter module details, add tasks with deadlines, automatically generate a weekly study timetable, record study durations, track mood, and save/load data.
 
-This is the basic code for a command line application which you should use for your Unit 2 project.
+### 2. Files
+This project is divided into three main files.<br/>
+1. `main.c` handles menu navigation
+2. `funcs.c` contains all functions implementation
+3. `funcs.h` contains all functions protoypes, struct difinitions, and global variable declarations<br/>
 
-The code has separated the menu handling code in `main.c` and the function implementations in `funcs.c`. You should add your code to `funcs.c` (or you can create new files if you wish), and update `main.c` to call your functions from the menu.
-
-
-### 1 Run code
-
-You can build the code as we have been using in the labs with 
-`gcc main.c funcs.c -o main.out -lm` (the `-lm` is required to link the math library). You can also use `make -B` to force a rebuild using the provided `Makefile`.
-
-Then run the code with `./main.out`
+For File I/O, this program automatically saves `modules.dat`, `tasks.dat`, and `week.dat` in binary file `data.bin`.
 
 
-### 2 The assignment
-
-Please read the assignment brief on the Minerva page for details of what you need to implement. 
+### 3. Run 
+You can run the application with `./main.out`
 
 
 
-### 3 Test command
 
-The `test.sh` script is provided to check that your code compiles correctly. This is what the autograder will use to check your submission. You can run it with `bash test.sh` or `./test.sh` or just `make test`. 
-
-You do not need to modify this script, but you can look at it to see what it does.
-
-
-### 4 Submit Solution
-
-Use the same method as previous labs to commit and push your code to your GitHub repository for the autograder to check. 
-
-In your final journal post, please include a link to your GitHub repository containing your code  *and* a zip file of your code as an attachment.
