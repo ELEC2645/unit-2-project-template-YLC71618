@@ -59,10 +59,21 @@ void inputModules(void) {
     char buf[128];
     char slot[50];
     char choice[20];
-    
-    printf("\nHow many modules would you like to enter? ");
-    scanf("%d", &no_module);
-    getchar();
+    while(1) {
+        printf("\nHow many modules would you like to enter? ");
+        if(scanf("%d", &no_module)!=1) {
+            printf("Invalid input! Please enter an integer\n");
+            while(getchar() != '\n'); //clear all until reach '\n'
+            continue;
+        }
+        if(no_module<=0 || no_module>20){
+            printf("Please enter a number between 1-20.\n");
+            continue;
+        }
+        while(getchar() != '\n'); //clear all until reach '\n'
+        break;
+
+    }
 
     for(int i=0; i<no_module; i++) {
         
@@ -71,14 +82,64 @@ void inputModules(void) {
         //replace '\n' with '\0' to avoid unnecessary line change
         modules[moduleCount].name[strcspn(modules[moduleCount].name,"\n")] = '\0'; 
 
-        printf("Please enter module %d credits: ", moduleCount+1);
-        scanf("%d", &modules[moduleCount].credits);
-        getchar();
+        while(1) {
+            printf("Please enter module %d credits: ", moduleCount+1);
+            if(scanf("%d", &modules[moduleCount].credits)!=1) {
+                printf("Invalid input! Please enter an integer\n");
+                while(getchar() != '\n'); //clear all until reach '\n'
+                continue;
+            }
+            if(modules[moduleCount].credits<0){
+                printf("Credits cannot be negative. Please enter again\n");
+                continue;
+            }
+            if(modules[moduleCount].credits>120){
+                printf("Too many credits! Please enter again\n");
+                continue;
+            }
+            while(getchar() != '\n'); //clear all until reach '\n'
+            break;
 
-        printf("Enter timetable slot (format: Mon10-13): ");
-        fgets(slot, sizeof(slot), stdin);
-        slot[strcspn(slot,"\n")] = '\0';
+        }
+        while(1) {
 
+            printf("Enter timetable slot (format: Mon10-13): ");
+            fgets(slot, sizeof(slot), stdin);
+            slot[strcspn(slot,"\n")] = '\0';
+
+            //check length
+            if(strlen(slot) < 8) {
+                printf("Invalid format! Please try again!\n");
+                continue;
+            }
+            //check day
+            //strncmp() compares the first 3 characters of two strings 
+            //if no mismatch return 0
+            if (strncmp(slot, "Mon", 3)!=0 &&
+                strncmp(slot, "Tue", 3)!=0 &&
+                strncmp(slot, "Wed", 3)!=0 &&
+                strncmp(slot, "Thu", 3)!=0 &&
+                strncmp(slot, "Fri", 3)!=0 &&
+                strncmp(slot, "Sat", 3)!=0 &&
+                strncmp(slot, "Sun", 3)!=0){
+                
+                printf("Invalid day. Please use Mon/Tue/Wed/Thu/Sat/Sun\n");
+                continue;
+            }
+            //check HH-HH
+            if(sscanf(slot+3, "%d-%d", &start, &end) != 2) {
+                printf("Invalid time format. Please use Mon10-13: \n");
+                continue;
+            }        
+            //check time
+            if(start<0 || start>23 || end<0 || end>23 || start>=end) {
+                printf("Invalid hour range. Example: Mon10-13: \n");
+                continue;
+            }                
+            break;//out of loop
+
+        }
+        
         parseSlot(slot, &day, &start, &end);
 
         int n = modules[moduleCount].slotCount;
@@ -99,7 +160,54 @@ void inputModules(void) {
             if(slot[0]=='S' || slot[0]=='s'){
                 break;
             }
+            // input validation
+            while(1) {
 
+                //check length
+                if(strlen(slot) < 8) {
+                    printf("Invalid format! Please try again!\n");
+                    printf("Enter 'S' or 's' to stop, otherwise enter next time slot(format: Mon10-13): ");
+                    fgets(slot, sizeof(slot), stdin);
+                    slot[strcspn(slot,"\n")] = '\0';
+                    continue;
+                }
+                //check day
+                //strncmp() compares the first 3 characters of two strings 
+                //if no mismatch return 0
+                if (strncmp(slot, "Mon", 3)!=0 &&
+                    strncmp(slot, "Tue", 3)!=0 &&
+                    strncmp(slot, "Wed", 3)!=0 &&
+                    strncmp(slot, "Thu", 3)!=0 &&
+                    strncmp(slot, "Fri", 3)!=0 &&
+                    strncmp(slot, "Sat", 3)!=0 &&
+                    strncmp(slot, "Sun", 3)!=0){
+                
+                    printf("Invalid day. Please use Mon/Tue/Wed/Thu/Sat/Sun\n");
+                    printf("Enter 'S' or 's' to stop, otherwise enter next time slot(format: Mon10-13): ");
+                    fgets(slot, sizeof(slot), stdin);
+                    slot[strcspn(slot,"\n")] = '\0';
+                    continue;
+                }
+                //check HH-HH
+                if(sscanf(slot+3, "%d-%d", &start, &end) != 2) {
+                    printf("Invalid time format. Please use Mon10-13: \n");
+                    printf("Enter 'S' or 's' to stop, otherwise enter next time slot(format: Mon10-13): ");
+                    fgets(slot, sizeof(slot), stdin);
+                    slot[strcspn(slot,"\n")] = '\0';
+                    continue;
+                }        
+                //check time
+                if(start<0 || start>23 || end<0 || end>23 || start>=end) {
+                    printf("Invalid hour range. Example: Mon10-13: \n");
+                    printf("Enter 'S' or 's' to stop, otherwise enter next time slot(format: Mon10-13): ");
+                    fgets(slot, sizeof(slot), stdin);
+                    slot[strcspn(slot,"\n")] = '\0';
+                    continue;
+                }                
+                break;//out of loop
+
+            }     
+                  
             parseSlot(slot, &day, &start, &end);
             n = modules[moduleCount].slotCount;
             modules[moduleCount].weekday[n] = day;
@@ -155,27 +263,50 @@ void inputTasks(void){
 
     int selectModule;
     int selectType;
-
-    printf("\n========Modules========\n");
+    printf("\n-------------- Modules --------------\n");
     for(int i=0; i<moduleCount; i++) {
         printf("%d. %s\n", i+1, modules[i].name);
     }
-    //Task module name
-    printf("Please select module (Integer): ");
-    scanf("%d", &selectModule);
-    getchar(); //remove '\n'
+    
+    //input validation- choose module
+    while(1) {
+        printf("Please select module (Integer): ");
+        if(scanf("%d", &selectModule) != 1) {
+            printf("Invalid input! Please enter integer only\n");
+            while(getchar() != '\n'); //remove '\n'
+            continue;
+        }
+        if(selectModule<1 || selectModule>moduleCount) {
+            printf("Invalid module. Choose 1-%d.\n", moduleCount);
+            continue;
+        }
+        while(getchar() != '\n'); //remove '\n'
+        break;
+
+    }
 
     //Store module name
     //copy module name into tasks module
     
     strcpy(tasks[taskCount].moduleName, modules[selectModule-1].name);
 
-    //Task name
-    printf("Please enter task name: ");
-    fgets(tasks[taskCount].name, sizeof(tasks[taskCount].name), stdin);
-    //replace '\n' with '\0' to avoid change lines
-    tasks[taskCount].name[strcspn(tasks[taskCount].name,"\n")] = '\0'; //replace '\n' with '\0'
+    //Task name validation
+    while(1) {
+        printf("Please enter task name: ");
+        fgets(tasks[taskCount].name, sizeof(tasks[taskCount].name), stdin);
 
+        //replace '\n' with '\0' to avoid change lines
+        tasks[taskCount].name[strcspn(tasks[taskCount].name,"\n")] = '\0'; 
+        //name cannot be none (blank)
+        if(strlen(tasks[taskCount].name) == 0) {
+            printf("Task name cannot be blank.\n");
+            continue;
+        }
+        break;
+
+    }
+    
+    
     //Task type
     const char *types[] = {"None", "Coursework", "Group Project", "Practical", "Exam", "Other"};
 
@@ -188,42 +319,124 @@ void inputTasks(void){
         printf("5. Other\n");
 
         printf("Please select task types (Integer): ");
-        scanf("%d", &selectType);
-        getchar(); //remove '\n'
+        //task type selection validaion 
+
+        if(scanf("%d", &selectType)!=1) {
+            printf("Invalid input! Can only enter integer 1-5\n"); 
+            while(getchar() != '\n'); //remove '\n'
+            continue;
+        }
+
+        if(selectType<1 || selectType>5) {
+            printf("Invalid selection! Can only enter 1-5\n"); 
+            while(getchar() != '\n'); //remove '\n'
+            continue;
+        }
 
         if(selectType == 5) {
-            printf("Please enter custom task type: ");
-            fgets(tasks[taskCount].type, sizeof(tasks[taskCount].type), stdin);
-            tasks[taskCount].type[strcspn(tasks[taskCount].type,"\n")] = '\0'; //replace '\n' with '\0'
-            break; //jump out of the loop
-        }else if(selectType >=1 && selectType<=4) {
+            getchar();
+            while(1) { //to deal with custom type validation
+                printf("Please enter custom task type: ");
+                fgets(tasks[taskCount].type, sizeof(tasks[taskCount].type), stdin);
+                tasks[taskCount].type[strcspn(tasks[taskCount].type,"\n")] = '\0'; //replace '\n' with '\0'
+
+                if(strlen(tasks[taskCount].type) == 0) {
+                    printf("Task type cannot be blank.\n");
+                    continue;
+                }   
+
+                break; //jump out of the loop
+            }
+        }else{
             //Store task type
             //copy selectType into tasks type
             strcpy(tasks[taskCount].type, types[selectType]);
-            break; //jump out of the loop
-        }else {
-            printf("Invalid Choice, only enter integer and 1-5");
-
+        
         }
+        break; //jump out of the loop
     }
     
     //Task Deadline
-    printf("Please Enter deadline year (YYYY): ");
-    scanf("%d", &tasks[taskCount].deadlineYear);
-    getchar();
+    //validation for year
+    while(1) {
+        printf("Please enter deadline year (YYYY): ");
+        if(scanf("%d", &tasks[taskCount].deadlineYear)!=1){
+            printf("Invalid year (Please enter integer)\n");
+            while(getchar() != '\n'); //remove '\n'
+            continue; //back to the loop; re-enter year
+        }
+        getchar();
+        //restrict year from 2025 to 2026
+        if(tasks[taskCount].deadlineYear<2025 || tasks[taskCount].deadlineYear>2026) {
+            printf("Year must be between 2025 or 2026.\n");
+            continue;
+        }
+        break;
+        
+    }
+    //validation for month
+    while(1) {
+        printf("Please enter deadline month (1-12): ");
+        if(scanf("%d", &tasks[taskCount].deadlineMonth)!=1){
+            printf("Invalid month (Please enter integer)\n");
+            while(getchar() != '\n'); //remove '\n'
+            continue; //back to the loop; re-enter year
+        }
+        getchar();
+        //restrict month (January to December)
+        if(tasks[taskCount].deadlineMonth<1 || tasks[taskCount].deadlineMonth>12) {
+            printf("Month must be 1-12.\n");
+            continue;
+        }
+        break;
+    }
 
-    printf("Please Enter deadline month (1-12): ");
-    scanf("%d", &tasks[taskCount].deadlineMonth);
-    getchar();
+    //validation for month
+    while(1) {
+        printf("Please enter deadline day (1-31): ");
+        if(scanf("%d", &tasks[taskCount].deadlineDay)!=1){
+            printf("Invalid day (Please enter integer)\n");
+            while(getchar() != '\n'); //remove '\n'
+            continue; //back to the loop; re-enter year
+        }
+        getchar();
 
-    printf("Please Enter deadline day (1-31): ");
-    scanf("%d", &tasks[taskCount].deadlineDay);
-    getchar();
+        int maxDay;
+        //february 
+        if(tasks[taskCount].deadlineMonth==2){
+            maxDay = 28;
+        }else if(tasks[taskCount].deadlineMonth==4 || tasks[taskCount].deadlineMonth==6 || tasks[taskCount].deadlineMonth==9 || tasks[taskCount].deadlineMonth==11){
+            maxDay = 30;
+        }else{
+            maxDay = 31;
+        }
+        //restrict day
+        if(tasks[taskCount].deadlineDay<1 || tasks[taskCount].deadlineDay>maxDay) {
+            printf("Invalid Day\n");
+            continue;
+        }
+        break;
+    }
 
-    //Task study hours
-    printf("Please enter your estimated study hours: ");
-    scanf("%lf", &tasks[taskCount].studyHours); //use lf because studyHours is type double
-    getchar();
+
+    //Task study hours validation
+    while(1) {
+        printf("Please enter your estimated study hours: ");
+        
+        //use lf because studyHours is type double
+        if(scanf("%lf", &tasks[taskCount].studyHours)!=1) {
+            printf("Invalid input/ Enter a number\n");
+            while(getchar() != '\n'); //remove '\n'
+            continue;
+        }
+        getchar();
+        if(tasks[taskCount].studyHours<=0 || tasks[taskCount].studyHours>=200) {
+            printf("Estimated study hours must be more than 0 and less than 200.\n");
+            continue;
+        }
+        break;
+    }
+
 
     taskCount++;
 
@@ -401,14 +614,20 @@ int dateDiffInDays(int y1, int m1, int d1, int y2, int m2, int d2) {
 void allocateTasks(void){
 
     allocatedCount = 0;
+    if(freeCount==0){
+        printf("No available free time this week\n");
+        printf("Tasks cannot be allocated\n");
+        return;
+
+    }
 
     //get todays system time
-    time_t now = time(NULL);         //Get current time
+    time_t now = time(NULL);  //Get current time
     struct tm *t = localtime(&now);  //Convert to local time structure
 
     //get separate year month day
     int todayDay = t->tm_mday;
-    int todayMonth = t->tm_mon + 1;     //Add 1 to get month 1-12
+    int todayMonth = t->tm_mon + 1; //Add 1 to get month 1-12
     int todayYear = t->tm_year + 1900; //Add 1900 to get the actual year
 
     //set maximum study hour of a task per day
@@ -582,7 +801,7 @@ void timerMenu(void) {
         printf("4. Back\n");
 
         printf("Select: ");
-        scanf("%d", &choice);
+        scanf("%d", &choice); //save selection in choice
         getchar(); //remove '\n'
 
         switch(choice) {
@@ -599,7 +818,7 @@ void timerMenu(void) {
                 return;
             
             default:
-                printf("Invalid Option. Please only enter 1-5!\n");
+                printf("Invalid Option. Please only enter 1-4!\n");
 
         }
     }
@@ -639,7 +858,7 @@ void startTimer(void) {
     double hours = seconds/3600.0;
     if(hours<0.01) hours=0.01; //minimum hours
 
-    int today = getToday();
+    int today = getToday(); //gets today
     weekRecord.duration[today] += hours;
     double eff=calculateEfficiency();
     printf("\nStatus: Timer Stopped.....\n");
@@ -647,26 +866,37 @@ void startTimer(void) {
     printf("Study duration: %.2f hours \n", hours);
     printf("Today's total: %.2f hours\n", weekRecord.duration[today]);
     printf("Week's total: %.2f hours\n", getWeeklyTotal());
-    printf("This Week's Efficiency: %.2f%%\n", calculateEfficiency());
+    printf("This Week's Efficiency: %.2f%%\n", eff);
     printReward(eff);
 
 }
 void manualRecord(void) {
     //manually record study time
     double manual;
-    double weekTotal=0;
 
     printf("\n------------ Manual Record ------------\n");
-    printf("\nEnter studied hours: ");
-    scanf("%lf", &manual);
     
+    while(1) {
+        printf("\nEnter studied hours: ");
+        if(scanf("%lf", &manual) != 1 || manual <= 0) {
+            printf("Invalid input! Please enter hours (number > 0): ");
+            while (getchar() != '\n');
+            continue;
+        }
+        if(manual >= 24) {
+            printf("Impossible to study over 24 hours a day! Please re-enter");
+            continue;
+        }
+        break;
+    }
+
     int today = getToday();
-    weekRecord.duration[today] += manual;
-    double eff=calculateEfficiency();
+    weekRecord.duration[today] += manual; //add input into array
+    double eff=calculateEfficiency(); //calls calculate efficiency function
     printf("Added %.2f hours \n", manual);
     printf("Today's total: %.2f hours\n", weekRecord.duration[today]);
     printf("Week's total: %.2f hours\n", getWeeklyTotal());
-    printf("This Week's Efficiency: %.2f%%\n", calculateEfficiency());
+    printf("This Week's Efficiency: %.2f%%\n", eff);
     printReward(eff);
 
 }
@@ -675,12 +905,12 @@ void printStudyGraph(void) {
     printf("\n----------- Weekly Study Graph -----------\n\n");
     printf("Hours\n\n");
     
-    //example
-    weekRecord.duration[0] = 2.0; // Mon
-    weekRecord.duration[1] = 1.5; // Tue
-    weekRecord.duration[3] = 2.0; // Thu
-    weekRecord.duration[5] = 3.0; // Sat
-    weekRecord.duration[6] = 1.0; // Sun
+    //example: use for testing
+    weekRecord.duration[0] = 2.0; //Mon
+    weekRecord.duration[1] = 1.5; //Tue
+    weekRecord.duration[3] = 2.0; //Thu
+    weekRecord.duration[5] = 3.0; //Sat
+    weekRecord.duration[6] = 1.0; //Sun
 
     //loop from monday to sunday
     for(int i=0; i<7; i++) {
@@ -688,6 +918,7 @@ void printStudyGraph(void) {
 
         double h = weekRecord.duration[i];
         if(h<0.01) {
+            printf("\n");
             continue;
         }
 
@@ -700,7 +931,7 @@ void printStudyGraph(void) {
         printf(" (%.2f hr)\n", h);
     }
     double eff=calculateEfficiency();
-    printf("This Week's Efficiency: %.2f%%\n", calculateEfficiency());
+    printf("This Week's Efficiency: %.2f%%\n", eff);
     printReward(eff);
     printf("\n--------------------------------------\n");
     
@@ -721,7 +952,8 @@ double calculateEfficiency(void) {
     for(int i=0; i<taskCount; i++) {
         double maxWeek=14; //maximum task hour for a week = 2*7
         if(tasks[i].studyHours < maxWeek) {
-            target += tasks[i].studyHours; //if required study hours is less than 14, set target to study hours
+            //if required study hours is less than 14, set target to study hours
+            target += tasks[i].studyHours; 
         }else{
             target += maxWeek; //if required study hours is more than 14, set target to 14
         }
@@ -729,8 +961,10 @@ double calculateEfficiency(void) {
     if(target<=0) return 0.0; //no task hour
     
     //calculate efficiency
-    double efficiency = (total/target)*100.0; //efficiency = total hours studied this week / required studied hours
-    if(efficiency>100) efficiency=100.0; //if exceed the required study hours, then set efficiency to 100
+    //efficiency = total hours studied this week/required studied hours
+    double efficiency = (total/target)*100.0; 
+    //if exceed the required study hours, then set efficiency to 100
+    if(efficiency>100) efficiency=100.0; 
 
     return efficiency;
 }
@@ -763,9 +997,21 @@ void moodMenu(void) {
         printf("3. Back\n");
 
         int choice;
-        printf("Select (1-3): ");
-        scanf("%d", &choice);
-        getchar();
+        while(1) {
+            printf("Select (1-3): ");
+            if(scanf("%d", &choice)!=1){
+                printf("Invalid Input! Please enter (1-3) integer\n");
+                while(getchar() != '\n');
+                continue;
+            }
+            getchar();
+            
+            if(choice < 1 || choice > 3) {
+                printf("Invalid option! Please enter 1-3.\n");
+                continue;
+            }  
+            break;          
+        }
 
         if(choice==1) {
             saveMood();
@@ -786,17 +1032,15 @@ void saveMood(void) {
 
     int mood;
     printf("How do you feel today? (1=Bad, 5=Great): ");
-
-    while(1) {
-        scanf("%d", &mood); //save input in mood
-        getchar(); //remove '\n'
-
-        if(mood >= 1 && mood<=5) break;
-        printf("Invalid Input. Please enter an integer 1-5: ");
+    
+    while(scanf("%d", &mood) != 1 || mood < 1 || mood > 5) {
+        printf("Invalid Input. Please enter integer 1-5: ");
+        //ask for re-enter
+        while (getchar() != '\n');
     }
 
-    weekRecord.mood[today] = mood;
-    printf("Mood saved for %s: %d/5\n", dayName(today), mood);
+    weekRecord.mood[today] = mood; //save mood in array
+    printf("Mood saved for %s: %d/5\n", dayName(today), mood); //print to the terminal
 
 }
 void printMoodGraph(void) {
@@ -821,3 +1065,106 @@ void printMoodGraph(void) {
     printf("\n--------------------------------------\n");
 
 }
+
+/*Files Save and Load*/
+void saveData(void)
+{
+    //open file
+    FILE *fp = fopen("data.bin", "wb"); //wb -> binary mode 
+    if (!fp) {
+        printf("Error saving data!\n"); //file validation
+        return;
+    }
+
+    //Save moduleCount
+    //The fwrite() writes data from a block of memory into a file.
+    fwrite(&moduleCount, sizeof(int), 1, fp);
+    // Save module array
+    fwrite(modules, sizeof(Module), moduleCount, fp);
+    // Save taskCount
+    fwrite(&taskCount, sizeof(int), 1, fp);
+    // Save task array
+    fwrite(tasks, sizeof(Task), taskCount, fp);
+    // Save weekRecord (study hours + mood)
+    fwrite(&weekRecord, sizeof(Week), 1, fp);
+
+    fclose(fp); //close file
+    printf("Data saved successfully!\n");
+}
+
+void loadData(void)
+{
+    FILE *fp = fopen("data.bin", "rb"); //open file
+    if (!fp) {
+        // File not found → first run → start with empty data
+        printf("No saved data before. Start fresh.\n");
+        return;
+    }
+    
+    //fread() reads data from a file and writes into a block of memory.
+    //Read moduleCount
+    fread(&moduleCount, sizeof(int), 1, fp);//destination, size, amount, file
+    //Read modules struct array
+    fread(modules, sizeof(Module), moduleCount, fp);
+    // Read taskCount
+    fread(&taskCount, sizeof(int), 1, fp);
+    // Read tasks struct array
+    fread(tasks, sizeof(Task), taskCount, fp);
+    // Read whole week's study & mood record
+    fread(&weekRecord, sizeof(Week), 1, fp);
+
+    fclose(fp);//close file
+    printf("Data loaded successfully!\n");
+}
+
+/*Menu 6: Reset Data*/
+void resetAllData(void) {
+    char confirm;
+    printf("\n======== Menu 6: Reset All Data ========\n");
+    while(1){
+        printf("Are you sure you want to reset everything? (y/n): ");
+        if(scanf(" %c", &confirm)!=1){
+            printf("Invalid Input! Please enter (y/n)\n");
+            while(getchar() != '\n');
+            continue;
+        }
+        if(confirm=='y' || confirm=='Y') {
+            break;  //reset
+        }
+        else if(confirm =='n' || confirm =='N') {
+            printf("\nCANCEL RESET: No data was deleted.\n\n");
+            return;//jump out of function
+        }
+        else{
+            printf("Invalid input! Please enter only 'y' or 'n'.\n\n");
+        }
+    }
+    
+    
+
+    while (getchar() != '\n');  //clean '\n'
+
+    //Reset Counters
+    moduleCount=0;
+    taskCount=0;
+    freeCount=0;
+    allocatedCount=0;
+    eventCount=0;
+
+    //Clear arrays
+    //use memsets to set all of the bytes in a block of memory to zero
+    memset(modules, 0, sizeof(modules));
+    memset(tasks, 0, sizeof(tasks));
+    memset(freeTime, 0, sizeof(freeTime));
+    memset(allocated, 0, sizeof(allocated));
+    memset(dayEvents, 0, sizeof(dayEvents));
+    memset(&weekRecord, 0, sizeof(weekRecord));
+
+    //Remove saved files
+    remove("modules.dat");
+    remove("tasks.dat");
+    remove("week.dat");
+    printf("   All DATA has been RESET!   \n");
+
+}
+

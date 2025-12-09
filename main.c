@@ -18,6 +18,7 @@ static int  is_integer(const char *s);  /* validate integer string */
 
 int main(void)
 {
+    loadData();
     /* this will run forever until we call exit(0) in select_menu_item() */
     for(;;) {
         main_menu();
@@ -37,7 +38,7 @@ static void main_menu(void)
 
 static int get_user_input(void)
 {
-    enum { MENU_ITEMS = 6 };   /* 1..5 = items, 6 = Exit */
+    enum { MENU_ITEMS = 7 };   /* 1..5 = items, 6 = Exit */
     char buf[128];
     int valid_input = 0;
     int value = 0;
@@ -93,7 +94,11 @@ static void select_menu_item(int input)
             moodMenu();
             go_back_to_main();
             break;
+        case 6:
+            resetAllData();
+            break;
         default:
+            saveData();
             printf("Bye! Remember to come back and study :)\n");
             exit(0);
     }
@@ -109,7 +114,8 @@ static void print_main_menu(void)
     printf("|\t\t3. Timetable\t\t\t|\n");
     printf("|\t\t4. Timer & Record\t\t|\n");
     printf("|\t\t5. Mood\t\t\t\t|\n");
-    printf("|\t\t6. Exit\t\t\t\t|\n");
+    printf("|\t\t6. Reset All Data\t\t|\n");
+    printf("|\t\t7. Exit\t\t\t\t|\n");
     printf("=================================================\n");
     
 }

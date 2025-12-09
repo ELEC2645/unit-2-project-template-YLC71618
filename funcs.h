@@ -56,7 +56,7 @@ extern Module modules[]; //List of all modules
 extern int moduleCount;  //Store current number of modules
 extern Task tasks[];     //List of all tasks
 extern int taskCount;    //Store current number of tasks
-extern FreeSlot freetime[];
+extern FreeSlot freeTime[];
 extern int freeCount; 
 extern AllocatedSlot allocated[];
 extern int allocatedCount;
@@ -71,20 +71,17 @@ void addTaskMenu(void);
 void timetableMenu(void);
 void timerMenu(void);
 void moodMenu(void);
+void resetAllData(void);
 
 /*Settings Functions*/
 void inputModules(void);
 void printModules(void);
-void loadModules(void);
-void saveModules(void);
 int convertDayToInt(const char *s);
 void parseSlot(const char *slot, int *day, int *start, int *end);
 
 /*Add Tasks Functions*/
 void inputTasks(void);
 void printTasks(void);
-void loadTasks(void);
-void saveTasks(void);
 
 /*Timetable Functions*/
 void calculateFreeTime(void);
@@ -102,8 +99,6 @@ char* dayName(int day);
 void startTimer(void);
 void manualRecord(void);
 void printStudyGraph(void);
-void loadWeek(void);
-void saveWeek(void);
 int getToday(void);
 double getWeeklyTotal(void);
 double calculateEfficiency(void);
@@ -113,6 +108,11 @@ void printReward(double efficiency);
 /*Mood Functions*/
 void saveMood(void);
 void printMoodGraph(void);
+
+/*Files Save and Load*/
+void saveData(void);
+void loadData(void);
+
 
 
 #endif
